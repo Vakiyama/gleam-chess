@@ -6,12 +6,39 @@ import glearray
 import gleeunit/should
 
 pub fn parse_empty_game_board_test() {
-  let empty_board = glearray.new() |> board.push_num(option.None, 64)
+  let empty_board = board.make_empty_board()
 
   game.from_fen("8/8/8/8/8/8/8/8 w - - 0 1")
   |> should.equal(
     Ok(game.Model(piece.White, empty_board, option.None, option.None, 0, 1)),
   )
+}
+
+pub fn insert_piece_test() {
+  let empty_board = board.make_empty_board()
+  let assert Ok(board_with_c6_queen) =
+    board.set_piece_at_algebraic_coordinate(
+      empty_board,
+      piece.get_piece(piece.White, piece.Queen),
+      "c6",
+    )
+
+  let assert Ok(board_with_c6_queen_from_fen) =
+    game.from_fen("8/8/8/8/8/2Q5/8/8 w - - 0 1")
+
+  glearray.length(board_with_c6_queen_from_fen.board) |> should.equal(64)
+
+  glearray.length(board_with_c6_queen) |> should.equal(64)
+
+  board_with_c6_queen_from_fen
+  |> should.equal(game.Model(
+    piece.White,
+    board_with_c6_queen,
+    option.None,
+    option.None,
+    0,
+    1,
+  ))
 }
 
 pub fn parse_pieces_test() {
@@ -63,7 +90,7 @@ pub fn parse_pieces_test() {
 }
 
 pub fn parse_color_test() {
-  let empty_board = glearray.new() |> board.push_num(option.None, 64)
+  let empty_board = board.make_empty_board()
 
   game.from_fen("8/8/8/8/8/8/8/8 b - - 0 1")
   |> should.equal(
@@ -72,7 +99,7 @@ pub fn parse_color_test() {
 }
 
 pub fn parse_castle_test() {
-  let empty_board = glearray.new() |> board.push_num(option.None, 64)
+  let empty_board = board.make_empty_board()
 
   game.from_fen("8/8/8/8/8/8/8/8 b KQkq - 0 1")
   |> should.equal(

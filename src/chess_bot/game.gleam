@@ -8,7 +8,7 @@ import gleam/string
 pub type ParseError {
   InvalidColor
   Piece(piece.ParseError)
-  NotInt
+  NotInt(String)
 }
 
 pub type Game {
@@ -37,9 +37,11 @@ pub fn from_fen(fen) {
   let castle = dash_to_none(fen_castle)
   let en_passant = dash_to_none(fen_en_passant)
   use half_moves <- result.try(
-    int.parse(fen_half_move) |> result.replace_error(NotInt),
+    int.parse(fen_half_move) |> result.replace_error(NotInt(fen_half_move)),
   )
-  use moves <- result.try(int.parse(fen_moves) |> result.replace_error(NotInt))
+  use moves <- result.try(
+    int.parse(fen_moves) |> result.replace_error(NotInt(fen_moves)),
+  )
 
   Ok(Model(color, board, castle, en_passant, half_moves, moves))
 }

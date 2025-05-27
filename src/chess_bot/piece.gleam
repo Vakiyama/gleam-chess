@@ -1,3 +1,5 @@
+import gleam/option
+
 pub type Piece {
   Piece(colour: Colour, kind: Kind)
 }
@@ -18,6 +20,10 @@ pub type Kind {
 
 pub type ParseError {
   InvalidPiece(String)
+}
+
+pub fn get_piece(colour, kind) {
+  option.Some(Piece(colour, kind))
 }
 
 pub fn fen_char_to_piece(fen_char) {
