@@ -65,12 +65,12 @@ pub fn file_to_int(file_char) {
 /// chess notation is 1 indexed, this converts
 /// to 0 index and also from a char
 pub fn rank_char_to_int(rank_char) {
-  use val <- result.map(
+  use val <- result.try(
     int.parse(rank_char)
     |> result.replace_error(NotInt(rank_char)),
   )
 
-  val - 1
+  rank_int_to_int(val)
 }
 
 pub fn rank_int_to_int(rank_int) {
