@@ -89,7 +89,7 @@ pub fn parse_pieces_test() {
   )
 }
 
-pub fn parse_color_test() {
+pub fn parse_colour_test() {
   let empty_board = board.make_empty_board()
 
   game.from_fen("8/8/8/8/8/8/8/8 b - - 0 1")
