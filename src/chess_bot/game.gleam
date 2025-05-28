@@ -7,6 +7,7 @@ import gleam/string
 
 pub type ParseError {
   InvalidColour
+  InvalidFenString
   Piece(piece.ParseError)
   NotInt(String)
 }
@@ -51,27 +52,32 @@ pub fn set_moves(game, moves) {
 }
 
 pub fn from_fen(fen) {
-  let assert [
-    fen_board,
-    fen_to_move,
-    fen_castle,
-    fen_en_passant,
-    fen_half_move,
-    fen_moves,
-  ] = string.split(fen, " ")
+  case string.split(fen, " ") {
+    [
+      fen_board,
+      fen_to_move,
+      fen_castle,
+      fen_en_passant,
+      fen_half_move,
+      fen_moves,
+    ] -> {
+      use board <- result.try(
+        board.from_fen(fen_board) |> result.map_error(Piece),
+      )
+      use colour_to_move <- result.try(from_fen_to_move(fen_to_move))
+      let castle = dash_to_none(fen_castle)
+      let en_passant = dash_to_none(fen_en_passant)
+      use half_moves <- result.try(
+        int.parse(fen_half_move) |> result.replace_error(NotInt(fen_half_move)),
+      )
+      use moves <- result.map(
+        int.parse(fen_moves) |> result.replace_error(NotInt(fen_moves)),
+      )
 
-  use board <- result.try(board.from_fen(fen_board) |> result.map_error(Piece))
-  use colour <- result.try(from_fen_to_move(fen_to_move))
-  let castle = dash_to_none(fen_castle)
-  let en_passant = dash_to_none(fen_en_passant)
-  use half_moves <- result.try(
-    int.parse(fen_half_move) |> result.replace_error(NotInt(fen_half_move)),
-  )
-  use moves <- result.try(
-    int.parse(fen_moves) |> result.replace_error(NotInt(fen_moves)),
-  )
-
-  Ok(Model(colour, board, castle, en_passant, half_moves, moves))
+      Model(colour_to_move:, board:, castle:, en_passant:, half_moves:, moves:)
+    }
+    _otherwise -> Error(InvalidFenString)
+  }
 }
 
 fn dash_to_none(dash_or_string) {

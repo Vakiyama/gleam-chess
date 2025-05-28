@@ -28,13 +28,11 @@ pub fn from_fen(fen_board) {
 
   string.replace(fen_board, "/", "")
   |> string.split("")
-  |> list.try_fold(board, fen_char_to_square)
+  |> list.try_fold(board, fen_char_to_board)
 }
 
-fn fen_char_to_square(board, fen_char) {
-  result.map(int.parse(fen_char), fn(number) {
-    push_num(board, option.None, number)
-  })
+fn fen_char_to_board(board, fen_char) {
+  result.map(int.parse(fen_char), push_num(board, option.None, _))
   |> result.try_recover(fn(_) {
     piece.fen_char_to_piece(fen_char)
     |> result.map(fn(piece) { glearray.copy_push(board, option.Some(piece)) })
@@ -65,12 +63,9 @@ pub fn file_to_int(file_char) {
 /// chess notation is 1 indexed, this converts
 /// to 0 index and also from a char
 pub fn rank_char_to_int(rank_char) {
-  use val <- result.try(
-    int.parse(rank_char)
-    |> result.replace_error(NotInt(rank_char)),
-  )
-
-  rank_int_to_int(val)
+  int.parse(rank_char)
+  |> result.replace_error(NotInt(rank_char))
+  |> result.try(rank_int_to_int)
 }
 
 pub fn rank_int_to_int(rank_int) {
@@ -82,23 +77,18 @@ pub fn rank_int_to_int(rank_int) {
 
 /// coordinate is a 2 char string such as "e2", "h8"
 pub fn set_piece_at_algebraic_coordinate(board, piece, coordinate) {
-  let coordinate_result = case string.length(coordinate) {
-    2 -> Ok(coordinate)
+  let coordinate_result = case string.split(coordinate, "") {
+    [file_char, rank_char] -> Ok(#(file_char, rank_char))
     _ -> Error(InvalidAlgebraicCoordinate(coordinate))
   }
-
-  use coordinate <- result.try(coordinate_result)
-  let assert [file_char, rank_char] = string.split(coordinate, "")
+  use #(file_char, rank_char) <- result.try(coordinate_result)
 
   use file <- result.try(file_to_int(file_char))
   use rank <- result.try(rank_char_to_int(rank_char))
   let index = file + 8 * rank
 
-  use board <- result.map(
-    glearray.copy_set(board, index, piece)
-    |> result.replace_error(InsertBoardError(index)),
-  )
-  board
+  glearray.copy_set(board, index, piece)
+  |> result.replace_error(InsertBoardError(index))
 }
 
 pub fn make_empty_board() {

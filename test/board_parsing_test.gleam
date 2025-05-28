@@ -99,33 +99,18 @@ pub fn parse_colour_test() {
 }
 
 pub fn parse_castle_test() {
-  let empty_board = board.make_empty_board()
-
-  game.from_fen("8/8/8/8/8/8/8/8 b KQkq - 0 1")
-  |> should.equal(
-    Ok(game.Model(
-      piece.Black,
-      empty_board,
-      option.Some("KQkq"),
-      option.None,
-      0,
-      1,
-    )),
-  )
+  game.from_fen("8/8/8/8/8/8/8/8 w KQkq - 0 1")
+  |> should.equal(Ok(
+    game.empty_game()
+    |> game.set_castle(option.Some("KQkq")),
+  ))
 }
 
 pub fn parse_en_passant_test() {
-  let empty_board = glearray.new() |> board.push_num(option.None, 64)
-
   game.from_fen("8/8/8/8/8/8/8/8 b - c6 0 1")
-  |> should.equal(
-    Ok(game.Model(
-      piece.Black,
-      empty_board,
-      option.None,
-      option.Some("c6"),
-      0,
-      1,
-    )),
-  )
+  |> should.equal(Ok(
+    game.empty_game()
+    |> game.set_colour(piece.Black)
+    |> game.set_en_passant(option.Some("c6")),
+  ))
 }
